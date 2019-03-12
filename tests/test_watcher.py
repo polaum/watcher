@@ -1,9 +1,8 @@
-import pytest
 from datetime import date
 from watcher import Movie, watched_films
 
 
-def test_movie_title():
+def test_movie_title_test():
     movie1= Movie('mary poppins')
     assert movie1.title == 'Mary Poppins'
 
