@@ -9,10 +9,13 @@ months = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 
 watched_films = []
 
 
-class Movie():
+class AlreadyWatchedException(Exception):
+    pass
+
+
+class Movie:
     def __init__(self, name: str):
-        name = name.replace(' ', '_')
-        name = name.lower()
+        name = name.replace(' ', '_').lower()
         movie_data = requests.get('http://www.omdbapi.com/?t=' + name + '&apikey=' + str(imdb_api_key))
         self.all_info: dict = movie_data.json()
 
@@ -25,6 +28,10 @@ class Movie():
         return int(self.all_info["Year"])
 
     @property
+    def imdb_id(self) -> str:
+        return str(self.all_info['imdbID'])
+
+    @property
     def release_date(self):
         release_txt = str(self.all_info['Released'])
         release_lst = release_txt.split(" ")
@@ -33,10 +40,10 @@ class Movie():
         year = int(release_lst[2])
         return date(year, month, day)
 
-    def watched(self):
-        if self.title in watched_films:
-            print("Already watched this film!")
-        else:
-            watched_films.append(self.title)
-            print("Successfully added {film_name} to your watched list!".format(film_name=self.title))
+    def is_watched(self):
+        if self.imdb_id in watched_films:
+            raise AlreadyWatchedException('Already watched this film!')
 
+    def new_watch(self):
+        if not self.is_watched():
+            watched_films.append(self.imdb_id)
