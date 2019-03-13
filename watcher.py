@@ -1,12 +1,24 @@
 import requests
+from pony.orm import *
 from datetime import date
 
 imdb_api_key = "b334d15e"
 
+db = Database()
+db.bind(provider='sqlite', filename='database.sqlite', create_db=True)
+
 months = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10,
           'Nov': 11, 'Dec': 12}
 
-watched_films = []
+
+class WatchedFilm(db.Entity):
+    title = Required(str)
+    year = Required(int)
+    imdb_id = PrimaryKey(str)
+    release_date = Required(date)
+
+
+db.generate_mapping(create_tables=True)
 
 
 class AlreadyWatchedException(Exception):
@@ -40,10 +52,16 @@ class Movie:
         year = int(release_lst[2])
         return date(year, month, day)
 
+    @db_session
     def is_watched(self):
-        if self.imdb_id in watched_films:
+        if WatchedFilm.get(imdb_id=self.imdb_id):
             raise AlreadyWatchedException('Already watched this film!')
 
+    @db_session
     def new_watch(self):
         if not self.is_watched():
-            watched_films.append(self.imdb_id)
+            WatchedFilm(title=self.title, year=self.year, imdb_id=self.imdb_id, release_date=self.release_date)
+
+
+
+
