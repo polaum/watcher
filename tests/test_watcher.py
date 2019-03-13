@@ -1,6 +1,9 @@
-import pytest
+import pytest, random
 from datetime import date
-from watcher import Movie, AlreadyWatchedException
+from watcher import Movie, AlreadyWatchedException, WatchedFilm
+
+movies = ['mary poppins', 'Aquaman', 'Cinderella', 'Pretty Woman']
+opt = len(movies) - 1
 
 
 def test_movie_title():
@@ -24,8 +27,14 @@ def test_movie_year():
 
 
 def test_new_watch():
-    movie1 = Movie('mary poppins')
-    movie1.new_watch()
+    movie_name = movies[random.randint(0, opt)]
+    movie1 = Movie(movie_name)
+    if movie1.is_watched:
+        with pytest.raises(AlreadyWatchedException):
+            movie1.new_watch()
+    else:
+        movie1.new_watch()
+        assert WatchedFilm.get(imdb_id=movie1.imdb_id) == True
 
 
 def test_already_watched():

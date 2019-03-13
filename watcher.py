@@ -56,6 +56,7 @@ class Movie:
     def is_watched(self):
         if WatchedFilm.get(imdb_id=self.imdb_id):
             raise AlreadyWatchedException('Already watched this film!')
+        return False
 
     @db_session
     def new_watch(self):
